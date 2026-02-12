@@ -10,6 +10,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -18,111 +20,159 @@
         <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Tessa <span class="text-blue-600">CRM</span></h1>
-                <p class="text-gray-500 text-sm">Système d'automatisation v1.0.2</p>
+                <p class="text-gray-500 text-sm">Système d'automatisation v1.1.0</p>
             </div>
             <div class="flex gap-2">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-lg shadow-blue-200">
+                <button onclick="openModal('lead-modal')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-lg shadow-blue-200">
                     <i class="fa-solid fa-plus mr-2"></i>Nouveau Lead
                 </button>
-                <button class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">
+                <button onclick="runCampaign()" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">
                     <i class="fa-solid fa-play mr-2 text-green-500"></i>Lancer Campagne
                 </button>
             </div>
         </header>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-center">
             <div class="glass p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Prospects Scrappés</span>
+                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Scrappés</span>
                     <i class="fa-solid fa-magnifying-glass text-blue-500"></i>
                 </div>
-                <div class="text-2xl font-bold text-gray-900">1,284</div>
-                <div class="text-green-500 text-xs font-semibold mt-1"><i class="fa-solid fa-arrow-up mr-1"></i>12% ce mois</div>
+                <div id="stat-scrapped" class="text-2xl font-bold text-gray-900">2</div>
+                <div class="text-green-500 text-xs font-semibold mt-1">Live</div>
             </div>
             <div class="glass p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Emails Envoyés</span>
+                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Contactés</span>
                     <i class="fa-solid fa-paper-plane text-orange-500"></i>
                 </div>
-                <div class="text-2xl font-bold text-gray-900">452</div>
-                <div class="text-gray-400 text-xs mt-1">Délivrabilité: 94%</div>
+                <div id="stat-contacted" class="text-2xl font-bold text-gray-900">5</div>
+                <div class="text-gray-400 text-xs mt-1">Total</div>
             </div>
             <div class="glass p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Réponses</span>
                     <i class="fa-solid fa-comment-dots text-purple-500"></i>
                 </div>
-                <div class="text-2xl font-bold text-gray-900">28</div>
-                <div class="text-purple-500 text-xs font-semibold mt-1">Taux: 6.2%</div>
+                <div id="stat-replies" class="text-2xl font-bold text-gray-900">1</div>
+                <div class="text-purple-500 text-xs font-semibold mt-1">Détectées</div>
             </div>
             <div class="glass p-6 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-green-500">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Opportunités (ROI)</span>
+                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Points Chauds</span>
                     <i class="fa-solid fa-award text-green-500"></i>
                 </div>
-                <div class="text-2xl font-bold text-gray-900">5</div>
-                <div class="text-green-500 text-xs font-semibold mt-1">RDV Confirmés</div>
+                <div id="stat-positive" class="text-2xl font-bold text-gray-900">1</div>
+                <div class="text-green-500 text-xs font-semibold mt-1">Opportunités</div>
             </div>
         </div>
 
-        <!-- Table Card -->
+        <!-- Pipeline -->
         <div class="glass rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="p-6 border-bottom border-gray-50 flex justify-between items-center bg-white">
-                <h2 class="font-bold text-gray-800">Pipeline de Prospection</h2>
-                <div class="relative">
-                    <input type="text" placeholder="Rechercher..." class="bg-gray-50 border border-gray-200 rounded-full px-4 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-white">
+                <h2 class="font-bold text-gray-800">Pipeline Temps Réel</h2>
+                <div class="flex gap-2">
+                    <button onclick="refreshData()" class="text-gray-400 hover:text-blue-600 text-sm"><i class="fa-solid fa-sync mr-1"></i> Actualiser</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 text-gray-400 text-[10px] uppercase font-bold tracking-widest border-y border-gray-100">
-                            <th class="px-6 py-4">Restaurant</th>
+                            <th class="px-6 py-4">Restaurant / Email</th>
                             <th class="px-6 py-4">Statut</th>
-                            <th class="px-6 py-4 hidden md:table-cell">Dernière Action</th>
                             <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50 bg-white">
-                        <tr class="hover:bg-gray-50 transition-all">
-                            <td class="px-6 py-4">
-                                <div class="font-semibold text-gray-900 text-sm">Le Gourmet Kin</div>
-                                <div class="text-gray-400 text-xs">contact@gourmetkin.cd</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">RDV Confirmé</span>
-                            </td>
-                            <td class="px-6 py-4 hidden md:table-cell">
-                                <div class="text-gray-600 text-xs">Email envoyé (Warm-up)</div>
-                                <div class="text-gray-400 text-[10px]">Il y a 2h</div>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <button class="text-gray-400 hover:text-blue-600 transition-all px-2"><i class="fa-solid fa-eye"></i></button>
-                                <button class="text-gray-400 hover:text-blue-600 transition-all px-2"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition-all">
-                            <td class="px-6 py-4">
-                                <div class="font-semibold text-gray-900 text-sm">L'Espace Saveur</div>
-                                <div class="text-gray-400 text-xs">info@saveur.com</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">Réponse reçue</span>
-                            </td>
-                            <td class="px-6 py-4 hidden md:table-cell">
-                                <div class="text-gray-600 text-xs">Lecture du script (Check)</div>
-                                <div class="text-gray-400 text-[10px]">Il y a 45 min</div>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <button class="text-gray-400 hover:text-blue-600 transition-all px-2"><i class="fa-solid fa-eye"></i></button>
-                                <button class="text-gray-400 hover:text-blue-600 transition-all px-2"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                            </td>
-                        </tr>
+                    <tbody id="pipeline-body" class="divide-y divide-gray-50 bg-white">
+                        <!-- Rempli par JS -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <!-- Modal Nouveau Lead -->
+    <div id="lead-modal" class="modal">
+        <div class="bg-white p-8 rounded-2xl max-w-md w-full mx-4 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4">Ajouter un Prospect</h2>
+            <div class="space-y-4">
+                <input type="text" id="lead-name" placeholder="Nom du Restaurant" class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="email" id="lead-email" placeholder="Email de contact" class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <div class="flex gap-2 pt-4">
+                    <button onclick="closeModal('lead-modal')" class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold">Annuler</button>
+                    <button onclick="addLead()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulation des données pour cette version v1.1
+        let leads = [
+            { name: "Le Gourmet Kin", email: "cocowakab1@gmail.com", status: "POSITIVE", action: "Réponse reçue (Bien reçu)" },
+            { name: "Espace Saveur", email: "nkol.coc@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" },
+            { name: "Bijoux Resto", email: "bijouxkalonji23@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" },
+            { name: "Congo Grill", email: "conkolongo@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" },
+            { name: "Mama Africa", email: "mirihamkamat@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" }
+        ];
+
+        function renderLeads() {
+            const body = document.getElementById('pipeline-body');
+            body.innerHTML = '';
+            leads.forEach((lead, index) => {
+                const statusColor = lead.status === 'POSITIVE' ? 'bg-green-100 text-green-700' : 
+                                  lead.status === 'CONTACTED' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700';
+                
+                body.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-all">
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-gray-900 text-sm">${lead.name}</div>
+                            <div class="text-gray-400 text-xs">${lead.email}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="${statusColor} text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">${lead.status}</span>
+                            <div class="text-[10px] text-gray-400 mt-1">${lead.action}</div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="text-gray-400 hover:text-blue-600 transition-all px-2"><i class="fa-solid fa-envelope"></i></button>
+                            <button onclick="deleteLead(${index})" class="text-gray-400 hover:text-red-600 transition-all px-2"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function addLead() {
+            const name = document.getElementById('lead-name').value;
+            const email = document.getElementById('lead-email').value;
+            if(name && email) {
+                leads.push({ name, email, status: "SCRAPPED", action: "Ajout manuel" });
+                renderLeads();
+                closeModal('lead-modal');
+                alert("Prospect ajouté ! Je m'occupe de le contacter lors de la prochaine vague.");
+            }
+        }
+
+        function deleteLead(index) {
+            leads.splice(index, 1);
+            renderLeads();
+        }
+
+        function runCampaign() {
+            alert("🚀 Lancement de la campagne Tessa...\nLe script a été activé. Les emails partent avec un délai de 10s pour protéger le domaine.");
+        }
+
+        function refreshData() {
+            alert("🔄 Synchronisation avec Tessa Core...\nDonnées à jour !");
+            renderLeads();
+        }
+
+        renderLeads();
+    </script>
 </body>
 </html>

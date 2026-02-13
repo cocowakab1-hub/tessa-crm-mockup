@@ -110,13 +110,7 @@
 
     <script>
         // Simulation des données pour cette version v1.1
-        let leads = [
-            { name: "Le Gourmet Kin", email: "cocowakab1@gmail.com", status: "POSITIVE", action: "Réponse reçue (Bien reçu)" },
-            { name: "Espace Saveur", email: "nkol.coc@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" },
-            { name: "Bijoux Resto", email: "bijouxkalonji23@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" },
-            { name: "Congo Grill", email: "conkolongo@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" },
-            { name: "Mama Africa", email: "mirihamkamat@gmail.com", status: "CONTACTED", action: "Warm-up envoyé" }
-        ];
+        let leads = [{"name": "Flat Hotel Kandolo Gombe", "email": "+243 843 297 575", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}, {"name": "Mike's Flat Hotel", "email": "+243 821 293 582", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Lemba"}, {"name": "Ixoras Hotel", "email": "+243 817 081 255", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Limete"}, {"name": "H\u00f4tel Continental House", "email": "+243 898 12 31 27", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Lingwala"}, {"name": "Flat H\u00f4tel Niembo la Gr\u00e2ce", "email": "+243 898 12 20 15 92", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Ngaba"}, {"name": "Flat Hotel La Lune", "email": "+243 844 121 602 87", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Barumbu"}, {"name": "Flat H\u00f4tel Alpha", "email": "+243 810 437 139", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Ngiri Ngiri"}, {"name": "Hotel Selton", "email": "+243 820 929 699", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}, {"name": "H\u00f4tel de la Gombe", "email": "hoteldelagombe@yahoo.fr", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}, {"name": "Hotel Golf Coast", "email": "+243 999 129 906", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}, {"name": "Hotel Stella", "email": "+243 900 002 999", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Limete"}, {"name": "Pacifique Hotel", "email": "+243 828 126 660", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Lingwala"}, {"name": "R\u00e9sidence de la Paix", "email": "residelapaix@gmail.com", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}, {"name": "Hotel Le Havre de Paix", "email": "+243 999 919 619", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}, {"name": "Hotel De Ville", "email": "+243 999 369 936", "status": "SCRAPPED", "action": "Localis\u00e9 \u00e0 Gombe"}];
 
         function renderLeads() {
             const body = document.getElementById('pipeline-body');
